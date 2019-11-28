@@ -29,5 +29,6 @@ module.exports = {
       },
     ],
     'import/prefer-default-export': 'off',
+    'no-console': ['error', { allow: ['tron'] }],
   },
 };

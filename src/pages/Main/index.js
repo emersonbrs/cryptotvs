@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 import { Text, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { coinIcons } from '../../utils/coinIcons';
 import normalizeMoney from '../../utils/format';
-import api from '../../services/api';
+
+import * as CryptoActions from '../../store/modules/crypto/actions';
 
 import {
   Container,
@@ -18,30 +21,19 @@ import {
   CryptoText,
 } from './styles';
 
-export default class Main extends Component {
+class Main extends Component {
   state = {
     newCrypto: '',
-    cryptos: '',
   };
 
-  async componentDidMount() {
-    const response = await api.get(`btc/metrics`);
-
-    const data = {
-      name: response.data.data.name,
-      symbol: response.data.data.symbol,
-      price: response.data.data.market_data.price_usd,
-      percentChangeUSD:
-        response.data.data.market_data.percent_change_usd_last_24_hours,
-    };
-    this.setState({ cryptos: data });
-  }
-
-  handleAddCrypto = async () => {};
+  handleAddNewCrypto = async () => {
+    this.props.addCryptoRequest('btc');
+  };
 
   render() {
-    const { cryptos, newCrypto } = this.state;
-    const { price } = cryptos;
+    const { newCrypto } = this.state;
+
+    const { crypto, removeCrypto } = this.props;
 
     return (
       <Container>
@@ -59,38 +51,45 @@ export default class Main extends Component {
         </Form>
 
         <CryptoContainer>
-          <CryptoCurrencies>
-            <CryptoDetails>
-              <Image
-                style={{ width: 60, height: 60 }}
-                source={{
-                  uri: coinIcons[cryptos.symbol],
-                }}
-              />
-              <CryptoText>
-                <Text
-                  style={{ fontWeight: 'bold', color: '#000', fontSize: 16 }}
-                >
-                  {cryptos.name}
-                </Text>
-                <Text style={{ color: '#778899', fontSize: 16 }}>
-                  {cryptos.symbol}
-                </Text>
-              </CryptoText>
-            </CryptoDetails>
+          {crypto.map(crypto => (
+            <CryptoCurrencies>
+              <CryptoDetails>
+                <Image
+                  style={{ width: 60, height: 60 }}
+                  source={{
+                    uri: coinIcons[crypto.data.symbol],
+                  }}
+                />
+                <CryptoText>
+                  <Text
+                    style={{ fontWeight: 'bold', color: '#000', fontSize: 16 }}
+                  >
+                    {crypto.data.name}
+                  </Text>
+                  <Text style={{ color: '#778899', fontSize: 16 }}>
+                    {crypto.data.symbol}
+                  </Text>
+                </CryptoText>
+              </CryptoDetails>
 
-            <CryptoUSD>
-              <Text style={{ fontWeight: 'bold', color: '#000', fontSize: 14 }}>
-                {/* $ {normalizeMoney(price)} */}$ {price}
-              </Text>
-              <Text style={{ color: '#000', fontSize: 14 }}>
-                {cryptos.percentChangeUSD}
-              </Text>
-            </CryptoUSD>
-          </CryptoCurrencies>
+              <CryptoUSD>
+                <Text
+                  style={{ fontWeight: 'bold', color: '#000', fontSize: 14 }}
+                >
+                  {normalizeMoney(crypto.data.market_data.price_usd)}
+                </Text>
+                <Text style={{ color: '#000', fontSize: 14 }}>
+                  {crypto.data.market_data.percent_change_usd_last_24_hours}
+                </Text>
+              </CryptoUSD>
+              <SubmitButton onPress={() => removeCrypto(crypto.data.symbol)}>
+                <Icon name="add" size={20} color="#fff" />
+              </SubmitButton>
+            </CryptoCurrencies>
+          ))}
         </CryptoContainer>
 
-        <AddCryptoButton onPress={this.handleAddCrypto}>
+        <AddCryptoButton onPress={this.handleAddNewCrypto}>
           <Text style={{ color: '#fff', fontSize: 16 }}>
             Add a Cryptocurrent
           </Text>
@@ -99,6 +98,16 @@ export default class Main extends Component {
     );
   }
 }
+
+const mapDispatchToProps = dispatch =>
+  bindActionCreators(CryptoActions, dispatch);
+
+export default connect(
+  state => ({
+    crypto: state.crypto,
+  }),
+  mapDispatchToProps
+)(Main);
 
 Main.navigationOptions = {
   title: 'CryptoTracker Pro',

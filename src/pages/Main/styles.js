@@ -8,6 +8,7 @@ export const Container = styled.View`
 `;
 
 export const CryptoContainer = styled.View`
+  flex-direction: column;
   margin: 15px 0 15px 0;
 `;
 
