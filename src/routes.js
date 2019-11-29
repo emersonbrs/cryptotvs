@@ -2,14 +2,14 @@ import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 
 import Main from './pages/Main';
-import AddCrypto from './pages/AddCrypto';
+import CryptoDescription from './pages/CryptoDescription';
 // import Repository from './pages/Repository';
 
 const Routes = createAppContainer(
   createStackNavigator(
     {
       Main,
-      AddCrypto,
+      CryptoDescription,
     },
     {
       headerLayoutPreset: 'left',

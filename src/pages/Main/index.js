@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { Text, Image } from 'react-native';
+import { Text, Image, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { coinIcons } from '../../utils/coinIcons';
-import normalizeMoney from '../../utils/format';
 
 import * as CryptoActions from '../../store/modules/crypto/actions';
 
@@ -12,8 +11,8 @@ import {
   Container,
   Form,
   Input,
+  ListCryptoText,
   SubmitButton,
-  AddCryptoButton,
   CryptoContainer,
   CryptoCurrencies,
   CryptoDetails,
@@ -26,8 +25,17 @@ class Main extends Component {
     newCrypto: '',
   };
 
+  componentDidMount() {
+    this.props.loadCryptoRequest();
+  }
+
+  goToTree = () => {
+    this.props.navigation.navigate('CryptoDescription');
+  };
+
   handleAddNewCrypto = async () => {
-    this.props.addCryptoRequest('btc');
+    this.props.addCryptoRequest(this.state.newCrypto);
+    this.setState({ newCrypto: '' });
   };
 
   render() {
@@ -45,11 +53,11 @@ class Main extends Component {
             value={newCrypto}
             onChangeText={text => this.setState({ newCrypto: text })}
           />
-          <SubmitButton>
+          <SubmitButton onPress={this.handleAddNewCrypto}>
             <Icon name="add" size={20} color="#fff" />
           </SubmitButton>
         </Form>
-
+        <ListCryptoText>List Of Cryptocurrencies</ListCryptoText>
         <CryptoContainer>
           {crypto.map(crypto => (
             <CryptoCurrencies>
@@ -62,7 +70,11 @@ class Main extends Component {
                 />
                 <CryptoText>
                   <Text
-                    style={{ fontWeight: 'bold', color: '#000', fontSize: 16 }}
+                    style={{
+                      fontWeight: 'bold',
+                      color: '#000',
+                      fontSize: 16,
+                    }}
                   >
                     {crypto.data.name}
                   </Text>
@@ -74,26 +86,47 @@ class Main extends Component {
 
               <CryptoUSD>
                 <Text
-                  style={{ fontWeight: 'bold', color: '#000', fontSize: 14 }}
+                  style={{
+                    fontWeight: 'bold',
+                    color: '#000',
+                    fontSize: 14,
+                  }}
                 >
-                  {normalizeMoney(crypto.data.market_data.price_usd)}
+                  $ {crypto.data.market_data.price_usd.toFixed(2)}
                 </Text>
-                <Text style={{ color: '#000', fontSize: 14 }}>
-                  {crypto.data.market_data.percent_change_usd_last_24_hours}
-                </Text>
+                {Math.sign(
+                  crypto.data.market_data.percent_change_usd_last_24_hours
+                ) == 1 ? (
+                  <Text style={{ color: 'green', fontSize: 12 }}>
+                    <Icon name="call-made" size={12} color="green" />
+                    {crypto.data.market_data.percent_change_usd_last_24_hours.toFixed(
+                      2
+                    )}
+                    %
+                  </Text>
+                ) : (
+                  <Text style={{ color: 'red', fontSize: 12 }}>
+                    <Icon name="call-received" size={12} color="red" />
+                    {crypto.data.market_data.percent_change_usd_last_24_hours.toFixed(
+                      2
+                    )}
+                    %
+                  </Text>
+                )}
               </CryptoUSD>
               <SubmitButton onPress={() => removeCrypto(crypto.data.symbol)}>
                 <Icon name="add" size={20} color="#fff" />
               </SubmitButton>
             </CryptoCurrencies>
           ))}
+          <SubmitButton
+            onPress={() => {
+              this.goToTree();
+            }}
+          >
+            <Icon name="add" size={20} color="#fff" />
+          </SubmitButton>
         </CryptoContainer>
-
-        <AddCryptoButton onPress={this.handleAddNewCrypto}>
-          <Text style={{ color: '#fff', fontSize: 16 }}>
-            Add a Cryptocurrent
-          </Text>
-        </AddCryptoButton>
       </Container>
     );
   }

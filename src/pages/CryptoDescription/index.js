@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container } from './styles';
 
-export default function AddCrypto() {
+export default function CryptoDescription() {
   return <Container />;
 }
