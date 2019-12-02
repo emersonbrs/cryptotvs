@@ -19,6 +19,12 @@ import {
 } from './styles';
 
 class Main extends Component {
+  static navigationOptions = () => {
+    return {
+      title: 'CryptoTracker Pro',
+    };
+  };
+
   state = {
     newCrypto: '',
     cryptosList: [
@@ -86,7 +92,3 @@ export default connect(
   }),
   mapDispatchToProps
 )(Main);
-
-Main.navigationOptions = {
-  title: 'CryptoTracker Pro',
-};
